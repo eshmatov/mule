@@ -14,11 +14,11 @@ import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
 import static org.mule.runtime.core.api.lifecycle.LifecycleUtils.initialiseIfNeeded;
 import static org.mule.runtime.extension.api.ExtensionConstants.TRANSACTIONAL_ACTION_PARAMETER_NAME;
 import static org.mule.runtime.module.extension.internal.runtime.resolver.ValueResolvingContext.from;
+import static org.mule.runtime.module.extension.internal.util.IntrospectionUtils.getFieldsOfType;
 import static org.mule.runtime.module.extension.internal.util.IntrospectionUtils.getSourceName;
 import static org.mule.runtime.module.extension.internal.util.MuleExtensionUtils.getInitialiserEvent;
 import static org.reflections.ReflectionUtils.getAllFields;
 import static org.reflections.ReflectionUtils.withAnnotation;
-
 import org.mule.runtime.api.connection.ConnectionException;
 import org.mule.runtime.api.connection.ConnectionHandler;
 import org.mule.runtime.api.exception.MuleException;
@@ -33,16 +33,18 @@ import org.mule.runtime.core.api.DefaultMuleException;
 import org.mule.runtime.core.api.Event;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.connector.ConnectionManager;
+import org.mule.runtime.core.api.construct.Flow;
 import org.mule.runtime.core.api.construct.FlowConstruct;
 import org.mule.runtime.core.api.construct.FlowConstructAware;
-import org.mule.runtime.core.api.functional.Either;
 import org.mule.runtime.core.api.exception.MessagingException;
+import org.mule.runtime.core.api.functional.Either;
 import org.mule.runtime.core.streaming.CursorProviderFactory;
 import org.mule.runtime.core.streaming.StreamingManager;
 import org.mule.runtime.extension.api.annotation.param.Config;
 import org.mule.runtime.extension.api.annotation.param.Connection;
 import org.mule.runtime.extension.api.exception.IllegalModelDefinitionException;
 import org.mule.runtime.extension.api.runtime.ConfigurationInstance;
+import org.mule.runtime.extension.api.runtime.FlowInfo;
 import org.mule.runtime.extension.api.runtime.source.Source;
 import org.mule.runtime.extension.api.runtime.source.SourceCallback;
 import org.mule.runtime.extension.api.runtime.source.SourceCallbackContext;
@@ -58,6 +60,7 @@ import org.mule.runtime.module.extension.internal.util.FieldSetter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -215,9 +218,7 @@ public final class SourceAdapter implements Startable, Stoppable, Initialisable,
 
   @Override
   public void start() throws MuleException {
-    if (source instanceof FlowConstructAware) {
-      ((FlowConstructAware) source).setFlowConstruct(flowConstruct);
-    }
+    injectFlowInfo();
 
     try {
       setConfiguration(configurationInstance);
@@ -227,6 +228,20 @@ public final class SourceAdapter implements Startable, Stoppable, Initialisable,
     } catch (Exception e) {
       throw new DefaultMuleException(e);
     }
+  }
+
+  private void injectFlowInfo() {
+    List<Field> fields = getFieldsOfType(source.getClass(), FlowInfo.class);
+    if (fields.isEmpty()) {
+      return;
+    } else if (fields.size() > 1) {
+      throw new MuleRuntimeException(createStaticMessage(format(
+          "Source of type '%s' has %d fields of type '%s'. Only one is allowed",
+          source.getClass().getName(), fields.size(), FlowInfo.class.getSimpleName())));
+    }
+
+    new FieldSetter<>(fields.get(0)).set(source, new ImmutableFlowInfo(flowConstruct.getName(),
+                                                                       ((Flow) flowConstruct).getMaxConcurrency()));
   }
 
   @Override

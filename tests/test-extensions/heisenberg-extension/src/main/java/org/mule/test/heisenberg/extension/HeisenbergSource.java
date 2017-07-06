@@ -18,13 +18,11 @@ import static org.mule.test.heisenberg.extension.HeisenbergSource.TerminateStatu
 import static org.mule.test.heisenberg.extension.HeisenbergSource.TerminateStatus.ERROR_INVOKE;
 import static org.mule.test.heisenberg.extension.HeisenbergSource.TerminateStatus.NONE;
 import static org.mule.test.heisenberg.extension.HeisenbergSource.TerminateStatus.SUCCESS;
-
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.message.Attributes;
 import org.mule.runtime.api.message.Error;
 import org.mule.runtime.api.scheduler.Scheduler;
 import org.mule.runtime.core.api.scheduler.SchedulerService;
-import org.mule.runtime.extension.api.runtime.source.SourceResult;
 import org.mule.runtime.extension.api.annotation.Alias;
 import org.mule.runtime.extension.api.annotation.Streaming;
 import org.mule.runtime.extension.api.annotation.execution.OnError;
@@ -39,6 +37,7 @@ import org.mule.runtime.extension.api.annotation.source.EmitsResponse;
 import org.mule.runtime.extension.api.runtime.operation.Result;
 import org.mule.runtime.extension.api.runtime.source.Source;
 import org.mule.runtime.extension.api.runtime.source.SourceCallback;
+import org.mule.runtime.extension.api.runtime.source.SourceResult;
 import org.mule.test.heisenberg.extension.model.Methylamine;
 import org.mule.test.heisenberg.extension.model.PersonalInfo;
 
