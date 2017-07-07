@@ -15,6 +15,8 @@ import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.mule.runtime.core.api.util.ClassUtils.loadClass;
 import static org.mule.runtime.core.api.util.ClassUtils.withContextClassLoader;
+import org.mule.runtime.api.exception.MuleRuntimeException;
+import org.mule.runtime.api.i18n.I18nMessageFactory;
 import org.mule.runtime.core.api.util.ClassUtils;
 import org.mule.runtime.extension.api.annotation.privileged.DeclarationEnrichers;
 import org.mule.runtime.extension.api.loader.DeclarationEnricher;
@@ -138,13 +140,19 @@ public class AbstractJavaExtensionModelLoader extends ExtensionModelLoader {
       ClassLoader extensionClassLoader = context.getExtensionClassLoader();
       Class annotation = extensionClassLoader.loadClass(DeclarationEnrichers.class.getName());
       DeclarationEnrichers enrichers = extensionType.getAnnotation((Class<DeclarationEnrichers>) annotation);
+
       if (enrichers != null) {
         return withContextClassLoader(extensionClassLoader,
                                       () -> stream(enrichers.value()).map(this::instantiateOrFail).collect(toList()));
       }
     } catch (ClassNotFoundException e) {
       // Do nothing
+    } catch (Exception e) {
+      throw new MuleRuntimeException(I18nMessageFactory.createStaticMessage(format(
+          "Failed to introspect extension '%s'. Is it trying to access the privileged API?",
+          extensionType.getName())), e);
     }
+
     return emptyList();
   }
 
