@@ -15,6 +15,7 @@ import org.mule.runtime.api.meta.NamedObject;
 import org.mule.runtime.api.meta.model.ExtensionModel;
 import org.mule.runtime.api.meta.model.parameter.ParameterModel;
 import org.mule.runtime.api.metadata.MediaType;
+import org.mule.runtime.extension.api.runtime.FlowInfo;
 import org.mule.runtime.extension.api.runtime.source.SourceCompletionCallback;
 import org.mule.runtime.extension.api.runtime.source.SourceResult;
 import org.mule.runtime.extension.api.annotation.param.Config;
@@ -48,6 +49,7 @@ public interface ExtensionParameter extends WithType, WithAnnotations, NamedObje
       .add(FlowListener.class)
       .add(StreamingHelper.class)
       .add(SourceResult.class)
+      .add(FlowInfo.class)
       .build();
 
   /**
