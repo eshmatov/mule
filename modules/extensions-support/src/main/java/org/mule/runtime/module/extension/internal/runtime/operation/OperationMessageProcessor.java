@@ -50,6 +50,7 @@ import org.mule.runtime.api.metadata.descriptor.TypeMetadataDescriptor;
 import org.mule.runtime.api.metadata.resolving.MetadataResult;
 import org.mule.runtime.core.api.DefaultMuleException;
 import org.mule.runtime.core.api.Event;
+import org.mule.runtime.core.api.construct.Flow;
 import org.mule.runtime.core.api.extension.ExtensionManager;
 import org.mule.runtime.core.api.processor.ParametersResolverProcessor;
 import org.mule.runtime.core.api.processor.Processor;
@@ -222,7 +223,7 @@ public class OperationMessageProcessor extends ExtensionComponent<OperationModel
       throws MuleException {
 
     return new DefaultExecutionContext<>(extensionModel, configuration, resolvedParameters, operationModel, event,
-                                         getCursorProviderFactory(), streamingManager, muleContext);
+                                         getCursorProviderFactory(), streamingManager, (Flow) flowConstruct, muleContext);
   }
 
   @Override

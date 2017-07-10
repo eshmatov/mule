@@ -10,6 +10,7 @@ import org.mule.runtime.api.meta.model.ComponentModel;
 import org.mule.runtime.api.meta.model.ExtensionModel;
 import org.mule.runtime.core.api.Event;
 import org.mule.runtime.core.api.MuleContext;
+import org.mule.runtime.core.api.construct.Flow;
 import org.mule.runtime.core.api.transaction.TransactionConfig;
 import org.mule.runtime.core.streaming.CursorProviderFactory;
 import org.mule.runtime.core.streaming.StreamingManager;
@@ -95,4 +96,9 @@ public abstract class AbstractExecutionContextAdapterDecorator<M extends Compone
     return decorated.getStreamingManager();
   }
 
+  @Override
+  public Flow getFlow() {
+    return decorated.getFlow();
+  }
 }
+

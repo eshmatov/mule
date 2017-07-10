@@ -17,6 +17,7 @@ import org.mule.runtime.api.meta.model.parameter.ParameterModel;
 import org.mule.runtime.api.util.LazyValue;
 import org.mule.runtime.core.api.Event;
 import org.mule.runtime.core.api.MuleContext;
+import org.mule.runtime.core.api.construct.Flow;
 import org.mule.runtime.core.api.transaction.TransactionConfig;
 import org.mule.runtime.core.streaming.CursorProviderFactory;
 import org.mule.runtime.core.streaming.StreamingManager;
@@ -51,6 +52,7 @@ public class DefaultExecutionContext<M extends ComponentModel> implements Execut
   private final CursorProviderFactory cursorProviderFactory;
   private final StreamingManager streamingManager;
   private final LazyValue<Optional<TransactionConfig>> transactionConfig;
+  private final Flow flow;
 
   /**
    * Creates a new instance with the given state
@@ -70,6 +72,7 @@ public class DefaultExecutionContext<M extends ComponentModel> implements Execut
                                  Event event,
                                  CursorProviderFactory cursorProviderFactory,
                                  StreamingManager streamingManager,
+                                 Flow flow,
                                  MuleContext muleContext) {
 
     this.extensionModel = extensionModel;
@@ -80,6 +83,7 @@ public class DefaultExecutionContext<M extends ComponentModel> implements Execut
     this.cursorProviderFactory = cursorProviderFactory;
     this.streamingManager = streamingManager;
     this.muleContext = muleContext;
+    this.flow = flow;
     transactionConfig = new LazyValue<>(() -> componentModel.isTransactional() ? of(buildTransactionConfig()) : empty());
   }
 
@@ -192,6 +196,14 @@ public class DefaultExecutionContext<M extends ComponentModel> implements Execut
   @Override
   public StreamingManager getStreamingManager() {
     return streamingManager;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public Flow getFlow() {
+    return flow;
   }
 
   private TransactionConfig buildTransactionConfig() {

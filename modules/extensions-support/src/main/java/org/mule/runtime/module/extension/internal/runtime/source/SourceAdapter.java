@@ -89,7 +89,6 @@ public final class SourceAdapter implements Startable, Stoppable, Initialisable,
   private final ResolverSet nonCallbackParameters;
   private final ResolverSet successCallbackParameters;
   private final ResolverSet errorCallbackParameters;
-  private final ResolverSet terminateCallbackParameters;
 
   private ConnectionHandler<Object> connectionHandler;
   private FlowConstruct flowConstruct;
@@ -110,7 +109,6 @@ public final class SourceAdapter implements Startable, Stoppable, Initialisable,
                        SourceCallbackFactory sourceCallbackFactory,
                        ResolverSet nonCallbackParameters,
                        ResolverSet successCallbackParameters,
-                       ResolverSet terminateCallbackParameters,
                        ResolverSet errorCallbackParameters) {
     this.extensionModel = extensionModel;
     this.sourceModel = sourceModel;
@@ -120,7 +118,6 @@ public final class SourceAdapter implements Startable, Stoppable, Initialisable,
     this.sourceCallbackFactory = sourceCallbackFactory;
     this.nonCallbackParameters = nonCallbackParameters;
     this.successCallbackParameters = successCallbackParameters;
-    this.terminateCallbackParameters = terminateCallbackParameters;
     this.errorCallbackParameters = errorCallbackParameters;
     this.configurationSetter = fetchField(Config.class);
     this.connectionSetter = fetchField(Connection.class);
@@ -149,6 +146,7 @@ public final class SourceAdapter implements Startable, Stoppable, Initialisable,
                                                                                          sourceModel, source, m,
                                                                                          cursorProviderFactory,
                                                                                          streamingManager,
+                                                                                         (Flow) flowConstruct,
                                                                                          muleContext,
                                                                                          sourceCallbackModel))
         .orElse(new NullSourceCallbackExecutor());

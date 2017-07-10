@@ -18,6 +18,7 @@ import org.mule.runtime.api.meta.model.config.ConfigurationModel;
 import org.mule.runtime.api.meta.model.operation.OperationModel;
 import org.mule.runtime.core.api.Event;
 import org.mule.runtime.core.api.MuleContext;
+import org.mule.runtime.core.api.construct.Flow;
 import org.mule.runtime.core.api.extension.ExtensionManager;
 import org.mule.runtime.core.streaming.CursorProviderFactory;
 import org.mule.runtime.core.streaming.StreamingManager;
@@ -71,6 +72,9 @@ public class DefaultExecutionContextTestCase extends AbstractMuleTestCase {
   private CursorProviderFactory<Object> cursorProviderFactory;
 
   @Mock
+  private Flow flow;
+
+  @Mock
   private StreamingManager streamingManager;
 
   private Object configurationInstance = new Object();
@@ -88,7 +92,7 @@ public class DefaultExecutionContextTestCase extends AbstractMuleTestCase {
 
     operationContext =
         new DefaultExecutionContext<>(extensionModel, of(configuration), resolverSetResult.asMap(), operationModel,
-                                      event, cursorProviderFactory, streamingManager, muleContext);
+                                      event, cursorProviderFactory, streamingManager, flow, muleContext);
   }
 
   @Test
@@ -130,5 +134,10 @@ public class DefaultExecutionContextTestCase extends AbstractMuleTestCase {
   @Test(expected = IllegalArgumentException.class)
   public void removeNullValueVariable() {
     operationContext.removeVariable(null);
+  }
+
+  @Test
+  public void getFlow() {
+    assertThat(flow, is(operationContext.getFlow()));
   }
 }

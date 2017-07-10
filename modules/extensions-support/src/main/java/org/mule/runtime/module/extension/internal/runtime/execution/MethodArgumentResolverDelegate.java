@@ -21,6 +21,7 @@ import org.mule.runtime.api.metadata.TypedValue;
 import org.mule.runtime.extension.api.annotation.param.Config;
 import org.mule.runtime.extension.api.annotation.param.Connection;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
+import org.mule.runtime.extension.api.runtime.FlowInfo;
 import org.mule.runtime.extension.api.runtime.operation.ExecutionContext;
 import org.mule.runtime.extension.api.runtime.operation.FlowListener;
 import org.mule.runtime.extension.api.runtime.parameter.Literal;
@@ -38,6 +39,7 @@ import org.mule.runtime.module.extension.internal.runtime.resolver.CompletionCal
 import org.mule.runtime.module.extension.internal.runtime.resolver.ConfigurationArgumentResolver;
 import org.mule.runtime.module.extension.internal.runtime.resolver.ConnectionArgumentResolver;
 import org.mule.runtime.module.extension.internal.runtime.resolver.ErrorArgumentResolver;
+import org.mule.runtime.module.extension.internal.runtime.resolver.FlowInfoArgumentResolver;
 import org.mule.runtime.module.extension.internal.runtime.resolver.FlowListenerArgumentResolver;
 import org.mule.runtime.module.extension.internal.runtime.resolver.LiteralArgumentResolver;
 import org.mule.runtime.module.extension.internal.runtime.resolver.MediaTypeArgumentResolver;
@@ -82,6 +84,7 @@ public final class MethodArgumentResolverDelegate implements ArgumentResolverDel
       new StreamingHelperArgumentResolver();
   private static final ArgumentResolver<SourceResult> SOURCE_RESULT_ARGUMENT_RESOLVER =
       new SourceResultArgumentResolver(ERROR_ARGUMENT_RESOLVER, SOURCE_CALLBACK_CONTEXT_ARGUMENT_RESOLVER);
+  private static final ArgumentResolver<FlowInfo> FLOW_INFO_ARGUMENT_RESOLVER = new FlowInfoArgumentResolver();
 
 
   private final Method method;
@@ -93,7 +96,7 @@ public final class MethodArgumentResolverDelegate implements ArgumentResolverDel
    * Creates a new instance for the given {@code method}
    *
    * @param parameterGroupModels {@link List} of {@link ParameterGroupModel} from the corresponding model
-   * @param method the {@link Method} to be called
+   * @param method               the {@link Method} to be called
    */
   public MethodArgumentResolverDelegate(List<ParameterGroupModel> parameterGroupModels, Method method) {
     this.method = method;
@@ -151,6 +154,8 @@ public final class MethodArgumentResolverDelegate implements ArgumentResolverDel
         argumentResolver = SOURCE_RESULT_ARGUMENT_RESOLVER;
       } else if (SourceCompletionCallback.class.equals(parameterType)) {
         argumentResolver = ASYNC_SOURCE_COMPLETION_CALLBACK_ARGUMENT_RESOLVER;
+      } else if (FlowInfo.class.equals(parameterType)) {
+        argumentResolver = FLOW_INFO_ARGUMENT_RESOLVER;
       } else {
         argumentResolver = new ByParameterNameArgumentResolver<>(paramNames.get(i));
       }
@@ -218,7 +223,8 @@ public final class MethodArgumentResolverDelegate implements ArgumentResolverDel
    * @param parameterGroupModels the parameter groups
    * @return mapping between the {@link Method}'s arguments which are parameters groups and their respective resolvers
    */
-  private Map<Parameter, ParameterGroupArgumentResolver<? extends Object>> getParameterGroupResolvers(List<ParameterGroupModel> parameterGroupModels) {
+  private Map<Parameter, ParameterGroupArgumentResolver<? extends Object>> getParameterGroupResolvers(
+      List<ParameterGroupModel> parameterGroupModels) {
     return parameterGroupModels.stream()
         .map(group -> group.getModelProperty(ParameterGroupModelProperty.class)
             .map(ParameterGroupModelProperty::getDescriptor).orElse(null))
